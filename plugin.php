@@ -41,6 +41,18 @@ function mytheme_blocks_register_block_type($block, $options = array()) {
     );
 }
 
+function mytheme_blocks_enqueue_assets() {
+    wp_enqueue_script(
+        'mytheme-blocks-editor-js',
+        plugins_url('dist/editor_script.js', __FILE__),
+        array(
+            'wp-data',
+        )
+    );
+}
+
+add_action('enqueue_block_editor_assets', 'mytheme_blocks_enqueue_assets');
+
 function mytheme_blocks_register() {
     wp_register_script(
         'mytheme-blocks-editor-script',
@@ -52,6 +64,10 @@ function mytheme_blocks_register() {
             'wp-block-editor',
             'wp-components',
             'lodash',
+            'wp-blob',
+            'wp-data',
+            'wp-html-entities',
+            'wp-compose',
         ),
     );
     
@@ -76,6 +92,47 @@ function mytheme_blocks_register() {
 
     mytheme_blocks_register_block_type('firstblock');
     mytheme_blocks_register_block_type('secondblock');
+    mytheme_blocks_register_block_type('team-member');
+    mytheme_blocks_register_block_type('team-members');
+    mytheme_blocks_register_block_type('latest-posts', array(
+        'render_callback' => 'mytheme_blocks_render_latest_posts_block',
+        'attributes' => array(
+            'numberOfPosts' => array(
+                'type' => 'number',
+                'default' => 5
+            ),
+            'postCategories' => array(
+                'type' => 'string'
+            )
+        )
+    ));
+    mytheme_blocks_register_block_type('redux');
+    mytheme_blocks_register_block_type('todo-list');
+    mytheme_blocks_register_block_type('todo-list-count');
 }
 
 add_action('init', 'mytheme_blocks_register');
+
+function mytheme_blocks_render_latest_posts_block($attributes) {
+    $args = array(
+        'posts_per_page' => $attributes['numberOfPosts']
+    );
+    if($attributes['postCategories']) {
+        $args['cat'] = $attributes['postCategories'];
+    }
+    $query = new WP_Query($args);
+    $posts = '';
+
+    if ($query->have_posts()) {
+        $posts .= '<ul class="wp-blcok-mytheme-blocks-latest-posts">';
+        while($query->have_posts()) {
+            $query->the_post();
+            $posts .= '<li><a href="' . esc_url(get_the_permalink()) . '">'.get_the_title() .'</a></li>';
+        }
+        $posts .= '</ul>';
+        wp_reset_postdata();
+        return $posts;
+    } else {
+        return '<div>'.__("No Posts Found", "mytheme-blocks").'</div>';
+    }
+}
