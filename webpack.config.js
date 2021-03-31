@@ -104,6 +104,8 @@ module.exports = (env, argv) => {
             '@wordpress/compose': ['wp', 'compose'],
             '@wordpress/plugins': ['wp', 'plugins'],
             '@wordpress/edit-post': ['wp', 'editPost'],
+            '@wordpress/hooks': ['wp', 'hooks'],
+            '@wordpress/dom-ready': ['wp', 'domReady'],
         },
     };
     return config;

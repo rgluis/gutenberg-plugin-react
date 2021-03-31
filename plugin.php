@@ -11,6 +11,26 @@ if( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+
+function mytheme_blocks_enqueue_assets() {
+    wp_enqueue_script(
+        'mytheme-blocks-editor-js',
+        plugins_url('dist/editor_script.js', __FILE__),
+        array(
+            'wp-data',
+            'wp-hooks',
+            'wp-compose',
+            'wp-block-editor',
+            'wp-components',
+            'wp-i18n',
+            'wp-dom-ready',
+        ),
+        false
+    );
+}
+
+add_action('init', 'mytheme_blocks_enqueue_assets',1);
+
 function mytheme_blocks_categories($categories, $post) {
     return array_merge(
         $categories,
@@ -40,18 +60,6 @@ function mytheme_blocks_register_block_type($block, $options = array()) {
         ),
     );
 }
-
-function mytheme_blocks_enqueue_assets() {
-    wp_enqueue_script(
-        'mytheme-blocks-editor-js',
-        plugins_url('dist/editor_script.js', __FILE__),
-        array(
-            'wp-data',
-        )
-    );
-}
-
-add_action('enqueue_block_editor_assets', 'mytheme_blocks_enqueue_assets');
 
 function mytheme_blocks_register() {
     wp_register_script(
@@ -109,9 +117,11 @@ function mytheme_blocks_register() {
     mytheme_blocks_register_block_type('redux');
     mytheme_blocks_register_block_type('todo-list');
     mytheme_blocks_register_block_type('todo-list-count');
+    mytheme_blocks_register_block_type('paragraph');
+    // mytheme_blocks_register_block_type('colors-hook');
 }
 
-add_action('init', 'mytheme_blocks_register');
+add_action('init', 'mytheme_blocks_register',2);
 
 function mytheme_blocks_render_latest_posts_block($attributes) {
     $args = array(
